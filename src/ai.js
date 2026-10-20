@@ -231,7 +231,9 @@ async function _aiComplete(systemPrompt, userMessage, config) {
         throw new Error(err.error?.message || `Anthropic API error: ${res.status}`);
       }
       const data = await res.json();
-      const text = data.content?.[0]?.text;
+      // Newer models think by default and return a thinking block before the
+      // text, so take the first text block rather than content[0].
+      const text = data.content?.find((b) => b.type === 'text')?.text;
       if (text == null) throw new Error('Unexpected response format from Anthropic API');
       return text;
     }

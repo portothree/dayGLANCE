@@ -36,9 +36,15 @@ describe('aiComplete follows the app language', () => {
   });
 
   it('appends it to the system field for Anthropic', async () => {
-    const calls = mockFetch({ content: [{ text: 'Guten Abend.' }] });
+    const calls = mockFetch({ content: [{ type: 'text', text: 'Guten Abend.' }] });
     await aiComplete(SYSTEM, 'u', { enabled: true, provider: 'anthropic', apiKey: 'k', model: 'm' });
     expect(calls[0].body.system.endsWith(GERMAN)).toBe(true);
+  });
+
+  it('reads the text block after a thinking block from Anthropic', async () => {
+    mockFetch({ content: [{ type: 'thinking', thinking: '' }, { type: 'text', text: 'Guten Abend.' }] });
+    const text = await aiComplete(SYSTEM, 'u', { enabled: true, provider: 'anthropic', apiKey: 'k', model: 'm' });
+    expect(text).toBe('Guten Abend.');
   });
 
   it('appends it to the system instruction for Gemini', async () => {
